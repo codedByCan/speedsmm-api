@@ -2,6 +2,8 @@
 
 `speedsmm-api`, Sosyal Medya Pazarlama (SMM) panelleri ile kolayca etkileşime geçmenizi sağlayan bir Node.js modülüdür. Bu modül, API anahtarınızı ve proxy ayarlarınızı kullanarak çeşitli SMM hizmetlerine erişim sağlar.
 
+https://speedsmm.com SMM Software
+
 ## 📦 Kurulum
 
 ```bash
@@ -76,11 +78,15 @@ Yeni bir sipariş ekler.
 ```javascript
 smm.addOrder({
     service: 'service_id',
+<<<<<<< HEAD
+    data: { link: "https://www.instagram.com/p/CFQ4ZJ5nZ6e/", quantity: 100, custom: "test" }
+=======
     data: {
         link: 'https://example.com',
         quantity: 100,
         custom: 'custom_data'
     }
+>>>>>>> f9b8dc4a6b8b3569308d2516cc86cc1306468ebb
 }).then(response => {
     console.log(response);
 }).catch(error => {

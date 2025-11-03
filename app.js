@@ -12,6 +12,28 @@ var HttpsProxyAgent = require('https-proxy-agent').HttpsProxyAgent;
     /_/            
 
 */
+const userAgents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36',
+    'Mozilla/5.0 (Android 14; Mobile; rv:121.0) Gecko/121.0 Firefox/121.0',
+    'Mozilla/5.0 (Android 13; Mobile; rv:120.0) Gecko/120.0 Firefox/120.0'
+];
 
 class smmAPI {
     constructor(options) {
@@ -21,7 +43,16 @@ class smmAPI {
         if(!this.key) throw new Error("Please provide an API key.");
         if(!this.api) throw new Error("Please provide an API URL.");
 
-        this.axiosInstance = axios.create(this.getRandomProxyConfig());
+        this.axiosInstance = axios.create({
+            ...this.getRandomProxyConfig(),
+            headers: {
+                'User-Agent': this.getRandomUserAgent()
+            }
+        });
+    }
+
+    getRandomUserAgent() {
+        return userAgents[Math.floor(Math.random() * userAgents.length)];
     }
 
     getRandomProxyConfig() {
@@ -58,6 +89,18 @@ class smmAPI {
             });
 
             if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
                 return { status: "systemError", error: 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
@@ -79,6 +122,18 @@ class smmAPI {
             });
 
             if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
                 return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
@@ -100,7 +155,19 @@ class smmAPI {
                 }
             });
             
-            if (!res.data && !Array.isArray(res.data)) {
+            if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
                 return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
@@ -122,37 +189,25 @@ class smmAPI {
                 }
             });
             
-            if (!res.data && !Array.isArray(res.data)) {
-                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
-            } else {
-                return res.data;
-            }
-        } catch (e) {
-            return  e?.response?.data || { status: "error", error: 'An error occurred while fetching order status.' };
-        }
-    };
-
-    async addOrder({ service, data }) {
-        try {
-            let res = await this.axiosInstance.post(this.api, qs.stringify({
-                key: this.key,
-                action: "add",
-                service: service, 
-                ...Object.keys(data).reduce((acc, key) => { return { ...acc, [key]: data[key] } }, {})
-            }), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            });
-
             if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
-                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
+                return { status: "systemError", error: 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
             }
-
         } catch (e) {
-            return e?.response?.data || { status: "systemError", error: 'An error occurred while adding an order.' };
+            return  { status: "systemError", error: e?.response?.data || 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
         }
     };
 
@@ -167,8 +222,94 @@ class smmAPI {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
+            
+            if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
+                return { status: "systemError", error: 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
+            } else {
+                return res.data;
+            }
+        } catch (e) {
+            return  { status: "systemError", error: e?.response?.data || 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
+        }
+    };
 
-            return res.data;
+    async addOrder({ service, data }) {
+        try {
+            let res = await this.axiosInstance.post(this.api, qs.stringify({
+                key: this.key,
+                action: "add",
+                service: service,
+                ...Object.keys(data).reduce((acc, key) => { return { ...acc, [key]: data[key] } }, {})
+            }), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+
+            if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
+            } else {
+                return res.data;
+            }
+
+        } catch (e) {
+            return e?.response?.data || { status: "error", error: 'An error occurred while adding an order.' };
+        }
+    };
+
+    async orderCancel({ order }) {
+        try {
+            let res = await this.axiosInstance.post(this.api, qs.stringify({
+                key: this.key,
+                action: "cancel",
+                order: order
+            }), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+
+            if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
+            } else {
+                return res.data;
+            }
         } catch (e) {
             return  e?.response?.data || { status: "error", error: 'An error occurred while cancelling an order.' };
         }
@@ -186,7 +327,23 @@ class smmAPI {
                 }
             });
 
-            return res.data;
+            if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
+            } else {
+                return res.data;
+            }
         } catch (e) {
             return  e?.response?.data || { status: "error", error: 'An error occurred while refilling an order.' };
         }
@@ -197,14 +354,30 @@ class smmAPI {
             let res = await this.axiosInstance.post(this.api, qs.stringify({
                 key: this.key,
                 action: "refill_status",
-                refill: order
+                order: order
             }), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
 
-            return res.data;
+            if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
+            } else {
+                return res.data;
+            }
         } catch (e) {
             return e?.response?.data || { status: "error", error: 'An error occurred while fetching refill status.' };
         }
@@ -221,10 +394,26 @@ class smmAPI {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
-
-            return res.data;
+            
+            if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
+                if (typeof res.data === 'object') {
+                    try {
+                        const normalizedData = JSON.parse(JSON.stringify(res.data));
+                        if (normalizedData) {
+                            return normalizedData;
+                        } else {
+                            throw new Error('Failed to normalize object');
+                        }
+                    } catch (error) {
+                        return { status: "systemError", error: 'Failed to process the object. Check your data structure.' };
+                    }
+                }
+                return { status: "systemError", error: 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
+            } else {
+                return res.data;
+            }
         } catch (e) {
-            return e?.response?.data || { status: "error", error: 'An error occurred while fetching refill status.' };
+            return  { status: "systemError", error: e?.response?.data || 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
         }
     };
 }
