@@ -58,12 +58,12 @@ class smmAPI {
             });
 
             if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
-                return { status: "systemError", error: 'An error occurred while fetching your balance. Maybe your proxy is not working.' };
+                return { status: "systemError", error: 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
             }
         } catch (e) {
-            return  { status: "systemError", error: e?.response?.data || 'An error occurred while fetching your balance. Maybe your proxy is not working.' };
+            return  { status: "systemError", error: e?.response?.data || 'An error occurred while fetching your balance. Maybe your proxy is not working.', details: res?.data };
         }
     };
 
@@ -79,7 +79,7 @@ class smmAPI {
             });
 
             if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
-                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.' };
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
             }
@@ -101,7 +101,7 @@ class smmAPI {
             });
             
             if (!res.data && !Array.isArray(res.data)) {
-                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.' };
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
             }
@@ -123,7 +123,7 @@ class smmAPI {
             });
             
             if (!res.data && !Array.isArray(res.data)) {
-                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.' };
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
             }
@@ -146,7 +146,7 @@ class smmAPI {
             });
 
             if (res.headers['content-type'] !== 'application/json' && !Array.isArray(res.data) && res.headers['content-type'] !== 'application/json; charset=UTF-8' || !res.data) {
-                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.' };
+                return { status: "systemError", error: 'An error occurred while fetching services. Maybe your proxy is not working.', details: res?.data };
             } else {
                 return res.data;
             }
